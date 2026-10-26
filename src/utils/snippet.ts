@@ -33,6 +33,23 @@ export type PaginatedSnippets = Pagination & {
   snippets: Snippet[]
 }
 
-export const getFileLanguage = (fileTypes: FileType[], fileExt?: string) => {
-  return fileExt && fileTypes?.find(x => x.extension == fileExt)
-}
+const FALLBACK_FILE_TYPES: FileType[] = [
+  { language: 'printscript', extension: 'ps' },
+  { language: 'python', extension: 'py' },
+  { language: 'java', extension: 'java' },
+  { language: 'golang', extension: 'go' },
+];
+
+export const getFileLanguage = (fileTypes: FileType[], fileExt?: string): FileType | undefined => {
+  if (!fileExt) return undefined;
+  const cleanExt = fileExt.toLowerCase().replace(/^\./, '');
+  const findMatch = (types: FileType[]) =>
+    types?.find((x) => {
+      const xExt = x.extension.toLowerCase().replace(/^\./, '');
+      if (xExt === cleanExt) return true;
+      if ((cleanExt === 'ps' || cleanExt === 'prs') && (xExt === 'ps' || xExt === 'prs')) return true;
+      return false;
+    });
+
+  return findMatch(fileTypes) || findMatch(FALLBACK_FILE_TYPES);
+};

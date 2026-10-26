@@ -1,4 +1,4 @@
-import {AUTH0_PASSWORD, AUTH0_USERNAME, BACKEND_URL, FRONTEND_URL} from "../../src/utils/constants";
+import {BACKEND_URL, FRONTEND_URL} from "../../src/utils/constants";
 import {CreateSnippet} from "../../src/utils/snippet";
 
 describe('Home', () => {
@@ -9,8 +9,8 @@ describe('Home', () => {
     // )
   })
   before(() => {
-    process.env.FRONTEND_URL = Cypress.env("FRONTEND_URL");
-    process.env.BACKEND_URL = Cypress.env("BACKEND_URL");
+    process.env.FRONTEND_URL = Cypress.env("FRONTEND_URL") || FRONTEND_URL;
+    process.env.BACKEND_URL = Cypress.env("BACKEND_URL") || BACKEND_URL;
   })
   it('Renders home', () => {
     cy.visit(FRONTEND_URL)
@@ -36,24 +36,26 @@ describe('Home', () => {
     cy.visit(FRONTEND_URL)
     const snippetData: CreateSnippet = {
       name: "Test name",
-      content: "print(1)",
+      content: "println(1);",
       language: "printscript",
       extension: ".ps"
     }
 
-    cy.intercept('GET', BACKEND_URL+"/snippets*", (req) => {
+    cy.intercept('GET', '**/snippets*', (req) => {
       req.reply((res) => {
-        expect(res.statusCode).to.eq(200);
+        expect([200, 201]).to.include(res.statusCode);
       });
     }).as('getSnippets');
 
+    const backendUrl = Cypress.env("BACKEND_URL") || BACKEND_URL;
+
     cy.request({
       method: 'POST',
-      url: '/snippets', // Adjust if you have a different base URL configured in Cypress
+      url: `${backendUrl}/snippets`,
       body: snippetData,
       failOnStatusCode: false // Optional: set to true if you want the test to fail on non-2xx status codes
     }).then((response) => {
-      expect(response.status).to.eq(200);
+      expect([200, 201]).to.include(response.status);
 
       expect(response.body.name).to.eq(snippetData.name)
       expect(response.body.content).to.eq(snippetData.content)

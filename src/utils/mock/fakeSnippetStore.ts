@@ -8,13 +8,13 @@ import {Rule} from "../../types/Rule.ts";
 
 const INITIAL_SNIPPETS: Snippet[] = [
   {
-    id: '9af91631-cdfc-4341-9b8e-3694e5cb3672',
+    id: '1',
     name: 'Super Snippet',
     content: 'let a : number = 5;\nlet b : number = 5;\n\nprintln(a + b);',
     compliance: 'pending',
     author: 'John Doe',
     language: 'printscript',
-    extension: 'prs'
+    extension: 'ps'
   },
   {
     id: 'c48cf644-fbc1-4649-a8f4-9dd7110640d9',
@@ -23,7 +23,7 @@ const INITIAL_SNIPPETS: Snippet[] = [
     compliance: 'not-compliant',
     author: 'John Doe',
     language: 'printscript',
-    extension: 'prs'
+    extension: 'ps'
   },
   {
     id: '34bf4b7a-d4a1-48be-bb26-7d9a3be46227',
@@ -32,7 +32,7 @@ const INITIAL_SNIPPETS: Snippet[] = [
     compliance: 'compliant',
     author: 'John Doe',
     language: 'printscript',
-    extension: 'prs'
+    extension: 'ps'
   }
 ]
 
@@ -141,7 +141,7 @@ const fakeTestCases: TestCase[] = [
 const fileTypes: FileType[] = [
   {
     language: "printscript",
-    extension: "prs",
+    extension: "ps",
   },
   {
     language: "python",

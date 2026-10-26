@@ -1,14 +1,14 @@
 import {useMutation, UseMutationResult, useQuery} from 'react-query';
 import {CreateSnippet, PaginatedSnippets, Snippet, UpdateSnippet} from './snippet.ts';
-import {SnippetOperations} from "./snippetOperations.ts";
+import {HttpSnippetOperations, SnippetOperations} from "./snippetOperations.ts";
 import {PaginatedUsers} from "./users.ts";
-import {FakeSnippetOperations} from "./mock/fakeSnippetOperations.ts";
 import {TestCase} from "../types/TestCase.ts";
 import {FileType} from "../types/FileType.ts";
 import {Rule} from "../types/Rule.ts";
 // import {useAuth0} from "@auth0/auth0-react";
 // import {useEffect} from "react";
 
+const httpSnippetOperations: SnippetOperations = new HttpSnippetOperations();
 
 export const useSnippetsOperations = () => {
   // const {getAccessTokenSilently} = useAuth0()
@@ -21,9 +21,9 @@ export const useSnippetsOperations = () => {
   //         .catch(error => console.error(error));
   // });
 
-  const snippetOperations: SnippetOperations = new FakeSnippetOperations(/* getAccessTokenSilently */); // TODO: Replace with your implementation
+  const snippetOperations: SnippetOperations = httpSnippetOperations;
 
-  return snippetOperations
+  return snippetOperations;
 }
 
 export const useGetSnippets = (page: number = 0, pageSize: number = 10, snippetName?: string) => {
@@ -169,5 +169,12 @@ export const useDeleteSnippet = ({onSuccess}: {onSuccess: () => void}) => {
 export const useGetFileTypes = () => {
   const snippetOperations = useSnippetsOperations()
 
-  return useQuery<FileType[], Error>('fileTypes', () => snippetOperations.getFileTypes());
+  return useQuery<FileType[], Error>('fileTypes', () => snippetOperations.getFileTypes(), {
+    initialData: [
+      { language: 'printscript', extension: 'ps' },
+      { language: 'python', extension: 'py' },
+      { language: 'java', extension: 'java' },
+      { language: 'golang', extension: 'go' },
+    ],
+  });
 }
