@@ -169,12 +169,5 @@ export const useDeleteSnippet = ({onSuccess}: {onSuccess: () => void}) => {
 export const useGetFileTypes = () => {
   const snippetOperations = useSnippetsOperations()
 
-  return useQuery<FileType[], Error>('fileTypes', () => snippetOperations.getFileTypes(), {
-    initialData: [
-      { language: 'printscript', extension: 'ps' },
-      { language: 'python', extension: 'py' },
-      { language: 'java', extension: 'java' },
-      { language: 'golang', extension: 'go' },
-    ],
-  });
+  return useQuery<FileType[], Error>('fileTypes', () => snippetOperations.getFileTypes());
 }

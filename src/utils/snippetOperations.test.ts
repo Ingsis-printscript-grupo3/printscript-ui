@@ -173,7 +173,7 @@ test('HttpSnippetOperations.listSnippetDescriptors maps array of summaries and n
       language: 'printscript',
       version: '1.1',
       ownerId: 'author-1',
-      compliance: 'NON_COMPLIANT',
+      lintStatus: 'NOT_COMPLIANT',
     },
     {
       id: 'uuid-2',
@@ -182,7 +182,7 @@ test('HttpSnippetOperations.listSnippetDescriptors maps array of summaries and n
       language: 'python',
       version: '3',
       ownerId: 'author-2',
-      compliance: 'COMPLIANT',
+      lintStatus: 'COMPLIANT',
     },
   ];
 
@@ -229,7 +229,7 @@ test('HttpSnippetOperations.listSnippetDescriptors supports Spring Data Page for
             name: 'Page Snippet',
             language: 'printscript',
             ownerId: 'owner-page',
-            compliance: 'COMPLIANT',
+            lintStatus: 'COMPLIANT',
           },
         ],
         totalElements: 42,
@@ -267,7 +267,7 @@ test('HttpSnippetOperations.createSnippet maps request and response', async () =
         version: '1.1',
         ownerId: 'user-owner',
         content: 'println(42);',
-        compliance: 'PENDING',
+        lintStatus: 'PENDING',
       }),
       {
         status: 201,
@@ -396,10 +396,6 @@ test('HttpSnippetOperations.deleteSnippet calls DELETE and returns id', async ()
 test('HttpSnippetOperations rule and helper methods work', async () => {
   const ops = new HttpSnippetOperations();
 
-  const fileTypes = await ops.getFileTypes();
-  assert(fileTypes.length > 0);
-  assert(fileTypes.some((f) => f.language === 'printscript'));
-
   const rules = await ops.getFormatRules();
   assert(rules.length > 0);
 
@@ -435,4 +431,40 @@ test('apiClient does not set application/json content-type on FormData', async (
 
   assert.equal(interceptedHeaders?.['Content-Type'], undefined);
   assert.equal(interceptedHeaders?.['X-User-Id'], getUserId());
+});
+
+test('getFileTypes returns only what the backend lists', async () => {
+  setBaseUrl('http://test-server:8080');
+  let requestUrl = '';
+  globalThis.fetch = async (input: RequestInfo | URL): Promise<Response> => {
+    requestUrl = String(input);
+    return new Response(JSON.stringify([{ language: 'printscript', extension: 'ps' }]), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  };
+
+  const fileTypes = await new HttpSnippetOperations().getFileTypes();
+
+  assert.equal(requestUrl, 'http://test-server:8080/file-types');
+  assert.deepEqual(fileTypes, [{ language: 'printscript', extension: 'ps' }]);
+});
+
+test('getFileTypes fails instead of inventing languages when the backend fails', async () => {
+  setBaseUrl('http://test-server:8080');
+  globalThis.fetch = async (): Promise<Response> => new Response('boom', { status: 500 });
+
+  await assert.rejects(() => new HttpSnippetOperations().getFileTypes());
+});
+
+test('apiClient uses relative paths when no base url is configured', async () => {
+  let requestUrl = '';
+  globalThis.fetch = async (input: RequestInfo | URL): Promise<Response> => {
+    requestUrl = String(input);
+    return new Response(null, { status: 204 });
+  };
+
+  await apiClient.delete('/snippets/abc');
+
+  assert.equal(requestUrl, '/snippets/abc');
 });

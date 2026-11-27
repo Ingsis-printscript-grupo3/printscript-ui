@@ -39,6 +39,17 @@ npm run dev
 
 This will start the Vite development server. You can now open your browser and navigate to http://localhost:5173/ to see the application running.
 
+### Backend
+
+The UI calls the API on its own origin. In development, Vite forwards those routes to the services (see
+[vite.config.ts](vite.config.ts)); on the VMs, nginx does it. By default it expects `snippet-service` on
+`localhost:8080` and `permission-service` on `localhost:8081`. To use other addresses, set them in `.env`:
+
+```
+SNIPPET_SERVICE_URL=http://localhost:9080
+PERMISSION_SERVICE_URL=http://localhost:9081
+```
+
 ## Build production version
 
 To use this UI in production you should use an optimized and static version, this command will generate this version in `dist` directory:  

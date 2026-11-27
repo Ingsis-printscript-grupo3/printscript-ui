@@ -51,7 +51,7 @@ export interface SnippetSummaryDto {
   language: string;
   version?: string;
   ownerId?: string;
-  compliance?: string;
+  lintStatus?: string;
   author?: string;
 }
 
@@ -63,7 +63,7 @@ export interface SnippetResponseDto {
   version?: string;
   ownerId?: string;
   content: string;
-  compliance?: string;
+  lintStatus?: string;
   author?: string;
 }
 
@@ -82,25 +82,6 @@ export interface UpdateSnippetRequestDto {
   version?: string;
   content?: string;
 }
-
-const DEFAULT_FILE_TYPES: FileType[] = [
-  {
-    language: "printscript",
-    extension: "ps",
-  },
-  {
-    language: "python",
-    extension: "py",
-  },
-  {
-    language: "java",
-    extension: "java",
-  },
-  {
-    language: 'golang',
-    extension: 'go',
-  },
-];
 
 const INITIAL_FORMATTING_RULES: Rule[] = [
   {
@@ -244,7 +225,7 @@ function mapSummaryToSnippet(summary: SnippetSummaryDto): Snippet {
     language: summary.language || 'printscript',
     extension: getExtensionForLanguage(summary.language),
     author: summary.author || summary.ownerId || 'unknown',
-    compliance: normalizeCompliance(summary.compliance),
+    compliance: normalizeCompliance(summary.lintStatus),
   };
 }
 
@@ -261,7 +242,7 @@ function mapResponseToSnippet(
       originalSnippet?.extension ||
       getExtensionForLanguage(response.language || originalSnippet?.language),
     author: response.author || response.ownerId || 'unknown',
-    compliance: normalizeCompliance(response.compliance),
+    compliance: normalizeCompliance(response.lintStatus),
   };
 }
 
@@ -593,13 +574,10 @@ export class HttpSnippetOperations implements SnippetOperations {
     return "success";
   }
 
+  // que lenguajes hay lo decide el backend: sin respuesta no se inventa una lista
   async getFileTypes(): Promise<FileType[]> {
-    try {
-      const response = await apiClient.get<FileType[]>('/file-types');
-      if (Array.isArray(response)) return response;
-    } catch {
-      // fallback
-    }
-    return DEFAULT_FILE_TYPES;
+    const response = await apiClient.get<FileType[]>('/file-types');
+    if (!Array.isArray(response)) throw new Error('Unexpected response from /file-types');
+    return response;
   }
 }
