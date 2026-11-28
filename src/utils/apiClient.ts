@@ -33,7 +33,9 @@ export const getBaseUrl = (): string => {
     envUrl = process.env.VITE_API_URL || process.env.BACKEND_URL;
   }
 
-  return (envUrl && envUrl.trim() !== '' ? envUrl.trim() : 'http://localhost:8080').replace(/\/+$/, '');
+  // sin VITE_API_URL las rutas quedan relativas: la API esta en el mismo origen que la UI, detras de nginx
+  // en las VMs y del proxy de Vite en desarrollo
+  return (envUrl && envUrl.trim() !== '' ? envUrl.trim() : '').replace(/\/+$/, '');
 };
 
 export const setUserId = (userId: string | null): void => {
